@@ -16,6 +16,8 @@ function initElements() {
         voiceSearch: document.getElementById('voice-search'),
         aiModeBtn: document.getElementById('ai-mode-btn'),
         recentItems: document.getElementById('recent-items'),
+        pinnedItems: document.getElementById('pinned-items'),
+        unpinnedItems: document.getElementById('recent-items'),
         backgroundImage: document.getElementById('background-image'),
         glassEffect: document.getElementById('glass-effect'),
         backgroundTypeRadios: document.querySelectorAll('input[name="background-type"]'),
@@ -70,10 +72,19 @@ function initElements() {
         confirmEditStyle: document.getElementById('confirm-edit-style'),
         enableLucky: document.getElementById('enable-lucky'),
         enableSound: document.getElementById('enable-sound'),
+        incognitoMode: document.getElementById('incognito-mode'),
         unstickyBtn: document.getElementById('unsticky-btn'),
-        searchContainer: document.getElementById('search-container')
+        searchContainer: document.getElementById('search-container'),
+        updateBtn: document.getElementById('update-btn'),
+        mobileUpdateBtn: document.getElementById('mobile-update-btn'),
+        updateModal: document.getElementById('update-modal'),
+        closeUpdateModal: document.getElementById('close-update-modal'),
+        closeUpdateBtn: document.getElementById('close-update-btn')
     };
 }
+
+// 无痕模式状态
+let isIncognitoMode = false;
 
 // 存储键
 const storageKeys = {
@@ -89,7 +100,9 @@ const storageKeys = {
     individualItemStyles: 'lews-search-individual-item-styles',
     enableLucky: 'lews-search-enable-lucky',
     enableSound: 'lews-search-enable-sound',
-    tutorialSeen: 'lews-search-tutorial-seen'
+    tutorialSeen: 'lews-search-tutorial-seen',
+    incognitoMode: 'lews-search-incognito-mode',
+    updateSeen: 'lews-search-update-seen-v0.9'
 };
 
 // 删除缓存
@@ -267,6 +280,14 @@ function loadSettings() {
     if (savedEnableSound !== null) {
         elements.enableSound.checked = savedEnableSound === 'true';
     }
+    
+    // 加载无痕模式设置
+    const savedIncognitoMode = localStorage.getItem(storageKeys.incognitoMode);
+    isIncognitoMode = savedIncognitoMode === 'true';
+    if (elements.incognitoMode) {
+        elements.incognitoMode.checked = isIncognitoMode;
+    }
+    updateIncognitoModeUI();
     
     // 加载卡片样式设置
     const savedItemStyle = localStorage.getItem(storageKeys.itemStyle);
@@ -568,7 +589,7 @@ function addDefaultVisits() {
 function showTutorial() {
     const tutorialSteps = [
         {
-            title: '欢迎使用 Lews Search',
+            title: '欢迎使用 LewSearch',
             content: '这是一个本地化搜索起始页，让我们一起了解如何使用它！',
             element: '.main-content'
         },
@@ -619,8 +640,14 @@ function showTutorial() {
             element: '#settings-btn'
         },
         {
+            title: '无痕模式',
+            content: '在设置面板中可以开启无痕模式。开启后，你的搜索历史和访问记录将不会被显示，保护你的隐私。平时可以通过设置面板随时开启或关闭无痕模式。',
+            element: '#settings-btn',
+            customStep: 'incognitoMode'
+        },
+        {
             title: '完成',
-            content: '现在你已经了解了 Lews Search 的基本功能，开始使用吧！',
+            content: '现在你已经了解了 LewSearch 的基本功能，开始使用吧！',
             element: '.main-content'
         }
     ];
@@ -687,6 +714,12 @@ function showTutorial() {
         // 检查是否是自定义步骤
         if (step.customStep === 'selectPinnedVisits') {
             showPinnedVisitsSelectionStep();
+            return;
+        }
+        
+        // 无痕模式步骤 - 询问是否开启无痕模式
+        if (step.customStep === 'incognitoMode') {
+            showIncognitoModeStep();
             return;
         }
         
@@ -872,6 +905,69 @@ function showTutorial() {
         });
     }
     
+    // 显示无痕模式步骤
+    function showIncognitoModeStep() {
+        // 更新弹窗内容
+        tutorialModal.innerHTML = `
+            <div class="tutorial-header">
+                <h3 class="tutorial-title">无痕模式</h3>
+                <button class="tutorial-close-btn" title="关闭教程 (ESC)">&times;</button>
+            </div>
+            <p class="tutorial-content">无痕模式可以保护你的隐私。开启后，你的搜索历史和访问记录将不会被显示。<br><br>平时可以通过设置面板随时开启或关闭无痕模式。</p>
+            <div class="tutorial-incognito-options">
+                <label class="tutorial-incognito-radio">
+                    <input type="radio" name="incognitoChoice" value="enable" checked>
+                    <span class="radio-text">开启无痕模式</span>
+                </label>
+                <label class="tutorial-incognito-radio">
+                    <input type="radio" name="incognitoChoice" value="disable">
+                    <span class="radio-text">保持正常模式</span>
+                </label>
+            </div>
+            <div class="tutorial-buttons">
+                <button class="tutorial-btn prev-btn">上一步</button>
+                <button class="tutorial-btn next-btn">下一步</button>
+            </div>
+            <div class="tutorial-hint">按 ESC 键可退出教程</div>
+        `;
+        
+        // 添加关闭按钮事件
+        const closeBtn = tutorialModal.querySelector('.tutorial-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeTutorial);
+        }
+        
+        // 添加上一步按钮事件
+        tutorialModal.querySelector('.prev-btn').addEventListener('click', () => {
+            currentStep--;
+            showCurrentStep();
+        });
+        
+        // 添加下一步按钮事件
+        tutorialModal.querySelector('.next-btn').addEventListener('click', () => {
+            // 获取用户选择
+            const selectedChoice = tutorialModal.querySelector('input[name="incognitoChoice"]:checked').value;
+            
+            // 根据选择设置无痕模式
+            if (selectedChoice === 'enable') {
+                isIncognitoMode = true;
+                localStorage.setItem(storageKeys.incognitoMode, 'true');
+                showIncognitoNotification('无痕模式已开启', '您的搜索历史和访问记录将不会被显示');
+            } else {
+                isIncognitoMode = false;
+                localStorage.setItem(storageKeys.incognitoMode, 'false');
+                showIncognitoNotification('无痕模式已关闭', '最近访问记录已恢复显示');
+            }
+            
+            // 更新UI
+            updateIncognitoModeUI();
+            
+            // 进入下一步
+            currentStep++;
+            showCurrentStep();
+        });
+    }
+    
     // 显示第一步
     showCurrentStep();
 }
@@ -960,7 +1056,9 @@ function toggleStyleInputsDisabled(disabled) {
 
 // 渲染最近访问
 function renderRecentVisits(visits) {
-    elements.recentItems.innerHTML = '';
+    // 清空两个容器
+    if (elements.pinnedItems) elements.pinnedItems.innerHTML = '';
+    if (elements.unpinnedItems) elements.unpinnedItems.innerHTML = '';
     
     // 调试：打印访问项数据
     console.log('=== 访问项数据调试 ===');
@@ -971,7 +1069,7 @@ function renderRecentVisits(visits) {
         const emptyMessage = document.createElement('div');
         emptyMessage.className = 'recent-empty';
         emptyMessage.textContent = '最近没有访问记录';
-        elements.recentItems.appendChild(emptyMessage);
+        elements.unpinnedItems.appendChild(emptyMessage);
         return;
     }
     
@@ -979,10 +1077,7 @@ function renderRecentVisits(visits) {
     const pinnedVisits = visits.filter(v => v.pinned);
     const unpinnedVisits = visits.filter(v => !v.pinned);
     
-    // 合并要显示的访问项（固定项 + 所有非固定项）
-    const visitsToRender = [...pinnedVisits, ...unpinnedVisits];
-    
-    // 如果有删除缓存，显示恢复提示
+    // 如果有删除缓存，显示恢复提示（在非固定容器末尾）
     if (deletedVisitCache) {
         const restoreHint = document.createElement('div');
         restoreHint.className = 'restore-hint';
@@ -991,10 +1086,11 @@ function renderRecentVisits(visits) {
             <button class="restore-btn">恢复内容</button>
         `;
         restoreHint.querySelector('.restore-btn').addEventListener('click', restoreDeletedVisit);
-        elements.recentItems.appendChild(restoreHint);
+        elements.unpinnedItems.appendChild(restoreHint);
     }
     
-    visitsToRender.forEach((visit, index) => {
+    // 渲染单个项目的辅助函数
+    function renderItem(visit, index, container) {
         const item = document.createElement('div');
         item.className = 'recent-item';
         item.dataset.index = index;
@@ -1162,11 +1258,54 @@ function renderRecentVisits(visits) {
             }
         });
         
-        elements.recentItems.appendChild(item);
+        container.appendChild(item);
+    }
+    
+    // 渲染固定项目
+    pinnedVisits.forEach((visit, index) => {
+        renderItem(visit, index, elements.pinnedItems);
+    });
+    
+    // 渲染非固定项目
+    unpinnedVisits.forEach((visit, index) => {
+        renderItem(visit, index, elements.unpinnedItems);
     });
     
     // 渲染完成后应用样式
     applyItemStyle();
+    
+    // 检测是否需要显示滑动提示（移动端）
+    updateScrollHint();
+}
+
+// 更新滑动提示
+function updateScrollHint() {
+    const recentlyUsed = document.querySelector('.recently-used');
+    if (!recentlyUsed) return;
+    
+    // 检查是否为移动端
+    if (window.innerWidth > 768) {
+        recentlyUsed.classList.remove('has-more');
+        return;
+    }
+    
+    // 检测固定项目容器是否超出容器宽度（横向滚动）
+    const pinnedItems = elements.pinnedItems;
+    const unpinnedItems = elements.unpinnedItems;
+    let hasOverflow = false;
+    
+    if (pinnedItems && pinnedItems.scrollWidth > pinnedItems.clientWidth) {
+        hasOverflow = true;
+    }
+    if (unpinnedItems && unpinnedItems.scrollWidth > unpinnedItems.clientWidth) {
+        hasOverflow = true;
+    }
+    
+    if (hasOverflow) {
+        recentlyUsed.classList.add('has-more');
+    } else {
+        recentlyUsed.classList.remove('has-more');
+    }
 }
 
 // 删除最近访问（通过索引）
@@ -1467,9 +1606,55 @@ function setupEventListeners() {
     });
     
     // 点击面板外部关闭
-    window.addEventListener('click', (e) => {
-        if (e.target === elements.settingsPanel) {
+    document.addEventListener('click', (e) => {
+        // 检查设置面板是否打开
+        if (!elements.settingsPanel.classList.contains('open')) return;
+        
+        // 检查点击的目标是否在设置面板内
+        const isClickInside = elements.settingsPanel.contains(e.target);
+        const isClickOnSettingsBtn = elements.settingsBtn.contains(e.target);
+        
+        // 如果点击在面板外部且不是点击设置按钮，则关闭面板
+        if (!isClickInside && !isClickOnSettingsBtn) {
             elements.settingsPanel.classList.remove('open');
+        }
+    });
+    
+    // 最近更新弹窗
+    function openUpdateModal() {
+        elements.updateModal.classList.add('open');
+        // 标记已查看更新
+        localStorage.setItem(storageKeys.updateSeen, 'true');
+        // 移除按钮上的小红点
+        if (elements.updateBtn) {
+            elements.updateBtn.style.setProperty('--dot-display', 'none');
+        }
+    }
+    
+    function closeUpdateModal() {
+        elements.updateModal.classList.remove('open');
+    }
+    
+    if (elements.updateBtn) {
+        elements.updateBtn.addEventListener('click', openUpdateModal);
+    }
+    
+    if (elements.mobileUpdateBtn) {
+        elements.mobileUpdateBtn.addEventListener('click', openUpdateModal);
+    }
+    
+    if (elements.closeUpdateModal) {
+        elements.closeUpdateModal.addEventListener('click', closeUpdateModal);
+    }
+    
+    if (elements.closeUpdateBtn) {
+        elements.closeUpdateBtn.addEventListener('click', closeUpdateModal);
+    }
+    
+    // 点击弹窗外部关闭
+    elements.updateModal.addEventListener('click', (e) => {
+        if (e.target === elements.updateModal) {
+            closeUpdateModal();
         }
     });
     
@@ -2232,12 +2417,33 @@ function setupEventListeners() {
         });
     }
     
+    // 无痕模式开关
+    if (elements.incognitoMode) {
+        elements.incognitoMode.addEventListener('change', (e) => {
+            isIncognitoMode = e.target.checked;
+            localStorage.setItem(storageKeys.incognitoMode, isIncognitoMode);
+            updateIncognitoModeUI();
+            
+            // 显示开启/关闭提醒
+            if (isIncognitoMode) {
+                showIncognitoNotification('无痕模式已开启', '您的搜索历史和访问记录将不会被显示');
+            } else {
+                showIncognitoNotification('无痕模式已关闭', '最近访问记录已恢复显示');
+            }
+        });
+    }
+    
     // 监听系统主题变化
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         const currentTheme = localStorage.getItem(storageKeys.theme);
         if (currentTheme === 'auto') {
             updateTheme('auto');
         }
+    });
+    
+    // 监听窗口大小变化，更新滑动提示
+    window.addEventListener('resize', () => {
+        updateScrollHint();
     });
     
     // 监听输入框键盘事件
@@ -2312,13 +2518,15 @@ function setupEventListeners() {
 // 搜索框滚动监听
 function setupSearchContainerScrollListener() {
     const searchContainer = document.getElementById('search-container');
-    const recentItems = document.getElementById('recent-items');
+    const pinnedItems = document.getElementById('pinned-items');
+    const unpinnedItems = document.getElementById('recent-items');
     
-    if (!searchContainer || !recentItems) return;
+    if (!searchContainer) return;
     
-    // 监听最近访问项目的滚动事件
-    recentItems.addEventListener('scroll', () => {
-        const scrollTop = recentItems.scrollTop;
+    // 辅助函数：处理滚动事件
+    function handleScroll(container) {
+        if (!container) return;
+        const scrollTop = container.scrollTop;
         
         if (scrollTop > 50) {
             // 滚动超过阈值，添加sticky类
@@ -2327,7 +2535,17 @@ function setupSearchContainerScrollListener() {
             // 滚动回到顶部，移除sticky类
             searchContainer.classList.remove('sticky');
         }
-    });
+    }
+    
+    // 监听固定项目容器的滚动事件
+    if (pinnedItems) {
+        pinnedItems.addEventListener('scroll', () => handleScroll(pinnedItems));
+    }
+    
+    // 监听非固定项目容器的滚动事件
+    if (unpinnedItems) {
+        unpinnedItems.addEventListener('scroll', () => handleScroll(unpinnedItems));
+    }
     
     // 点击置顶搜索框返回顶部
     // 使用 mousedown 事件替代 click，更可靠
@@ -2352,10 +2570,12 @@ function setupSearchContainerScrollListener() {
                 // 阻止默认行为，避免触发其他事件
                 e.preventDefault();
                 // 平滑滚动到顶部
-                recentItems.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+                if (pinnedItems) {
+                    pinnedItems.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                if (unpinnedItems) {
+                    unpinnedItems.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             }
         }
     });
@@ -2373,10 +2593,12 @@ function setupSearchContainerScrollListener() {
             searchContainer.classList.remove('sticky');
             
             // 滚动到顶部
-            recentItems.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            if (pinnedItems) {
+                pinnedItems.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if (unpinnedItems) {
+                unpinnedItems.scrollTo({ top: 0, behavior: 'smooth' });
+            }
             
             // 同时滚动主容器到顶部
             window.scrollTo({
@@ -2387,5 +2609,126 @@ function setupSearchContainerScrollListener() {
     }
 }
 
+// 显示无痕模式通知
+function showIncognitoNotification(title, message) {
+    // 移除已存在的通知
+    const existingNotification = document.querySelector('.incognito-notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // 创建通知元素
+    const notification = document.createElement('div');
+    notification.className = 'incognito-notification';
+    notification.innerHTML = `
+        <div class="incognito-notification-icon">
+            <i class="fas fa-user-secret"></i>
+        </div>
+        <div class="incognito-notification-content">
+            <div class="incognito-notification-title">${title}</div>
+            <div class="incognito-notification-message">${message}</div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 动画显示
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // 3秒后自动隐藏
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+    
+    // 双击通知关闭无痕模式
+    notification.addEventListener('dblclick', () => {
+        if (isIncognitoMode) {
+            isIncognitoMode = false;
+            localStorage.setItem(storageKeys.incognitoMode, 'false');
+            updateIncognitoModeUI();
+            showIncognitoNotification('无痕模式已关闭', '最近访问记录已恢复显示');
+        }
+    });
+}
+
+// 更新无痕模式UI
+function updateIncognitoModeUI() {
+    const body = document.body;
+    const recentVisited = document.querySelector('.recent-visited');
+    const incognitoIndicator = document.querySelector('.incognito-indicator');
+    const recentSection = document.querySelector('.recent-section');
+    const recentHeader = document.querySelector('.recent-header');
+    
+    // 更新设置面板中的开关状态
+    if (elements.incognitoMode) {
+        elements.incognitoMode.checked = isIncognitoMode;
+    }
+    
+    if (isIncognitoMode) {
+        body.classList.add('incognito-mode');
+        // 无痕模式下：隐藏最近访问内容，但显示指示器
+        if (recentSection) {
+            recentSection.classList.add('hidden');
+        }
+        if (recentHeader) {
+            recentHeader.classList.add('hidden');
+        }
+        if (recentVisited) {
+            recentVisited.classList.remove('hidden');
+        }
+        
+        // 为指示器添加单击和双击事件
+        if (incognitoIndicator) {
+            let clickTimer = null;
+            
+            incognitoIndicator.addEventListener('click', function handleClick(e) {
+                if (clickTimer) {
+                    // 双击：关闭无痕模式
+                    clearTimeout(clickTimer);
+                    clickTimer = null;
+                    isIncognitoMode = false;
+                    localStorage.setItem(storageKeys.incognitoMode, 'false');
+                    updateIncognitoModeUI();
+                    showIncognitoNotification('无痕模式已关闭', '最近访问记录已恢复显示');
+                } else {
+                    // 单击：提醒需要双击
+                    clickTimer = setTimeout(() => {
+                        showIncognitoNotification('无痕模式已开启', '双击此处可关闭无痕模式');
+                        clickTimer = null;
+                    }, 250);
+                }
+            });
+        }
+    } else {
+        body.classList.remove('incognito-mode');
+        // 显示最近访问内容
+        if (recentSection) {
+            recentSection.classList.remove('hidden');
+        }
+        if (recentHeader) {
+            recentHeader.classList.remove('hidden');
+        }
+    }
+}
+
+// 检查是否已查看更新
+function checkUpdateStatus() {
+    const updateSeen = localStorage.getItem(storageKeys.updateSeen);
+    if (updateSeen) {
+        // 已查看过更新，隐藏小红点
+        if (elements.updateBtn) {
+            elements.updateBtn.classList.add('update-seen');
+        }
+    }
+}
+
 // 初始化应用
 init();
+
+// 检查更新状态
+checkUpdateStatus();

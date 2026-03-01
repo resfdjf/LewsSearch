@@ -22,6 +22,110 @@ body.dark {
     color: #e8eaed;
 }
 
+/* 无痕模式 - 视觉提示 */
+body.incognito-mode .logo {
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #a855f7, #d946ef);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+body.incognito-mode .search-input {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3);
+}
+
+body.incognito-mode .search-input:focus {
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4);
+}
+
+/* 无痕模式指示器 */
+.incognito-indicator {
+    display: none;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    animation: incognito-pulse 2s ease-in-out infinite;
+    align-items: center;
+    gap: 8px;
+    margin: 10px auto;
+    width: fit-content;
+}
+
+body.incognito-mode .incognito-indicator {
+    display: flex;
+}
+
+@keyframes incognito-pulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
+    }
+}
+
+/* 无痕模式通知 */
+.incognito-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 90%;
+    width: auto;
+}
+
+.incognito-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.incognito-notification-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.incognito-notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.incognito-notification-title {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.incognito-notification-message {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* 隐藏最近访问区域 */
+.recent-visited.hidden {
+    display: none !important;
+}
+
+/* 隐藏最近访问头部和内容 */
+.recent-header.hidden,
+.recent-section.hidden {
+    display: none !important;
+}
+
 .container {
     position: relative;
     min-height: 100vh;
@@ -920,6 +1024,66 @@ body.dark .tutorial-visit-name {
     color: #e8eaed;
 }
 
+/* 教程无痕模式选项 */
+.tutorial-incognito-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: rgba(248, 249, 250, 0.8);
+    border-radius: 12px;
+    border: 1px solid #dadce0;
+}
+
+body.dark .tutorial-incognito-options {
+    background-color: rgba(45, 46, 48, 0.8);
+    border-color: #5f6368;
+}
+
+.tutorial-incognito-radio {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid transparent;
+}
+
+.tutorial-incognito-radio:hover {
+    background-color: rgba(66, 133, 244, 0.1);
+    border-color: rgba(66, 133, 244, 0.3);
+}
+
+body.dark .tutorial-incognito-radio {
+    background-color: rgba(32, 33, 36, 0.9);
+}
+
+body.dark .tutorial-incognito-radio:hover {
+    background-color: rgba(66, 133, 244, 0.2);
+    border-color: rgba(66, 133, 244, 0.5);
+}
+
+.tutorial-incognito-radio input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #4285f4;
+}
+
+.radio-text {
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+}
+
+body.dark .radio-text {
+    color: #e8eaed;
+}
+
 @keyframes pulse {
     0% {
         box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
@@ -1117,7 +1281,17 @@ body.dark .view-more-btn:hover {
     background-color: rgba(232, 234, 237, 0.2);
 }
 
-.recent-items {
+/* 桌面版隐藏区域标签和间距 */
+.recent-section-label {
+    display: none;
+}
+
+.recent-section {
+    margin-bottom: 0;
+}
+
+/* 桌面版：固定和非固定内容合并显示在同一个容器中 */
+.recent-section {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 20px;
@@ -1127,34 +1301,66 @@ body.dark .view-more-btn:hover {
     max-height: 400px;
 }
 
+/* 桌面版：让固定项目和非固定项目容器都使用contents显示 */
+.pinned-items,
+.unpinned-items {
+    display: contents;
+    gap: 0;
+    overflow: visible;
+    padding-right: 0;
+    min-height: auto;
+    max-height: none;
+}
+
 /* 自定义滚动条样式 */
-.recent-items::-webkit-scrollbar {
+.recent-section::-webkit-scrollbar,
+.recent-items::-webkit-scrollbar,
+.pinned-items::-webkit-scrollbar,
+.unpinned-items::-webkit-scrollbar {
     width: 8px;
 }
 
-.recent-items::-webkit-scrollbar-track {
+.recent-section::-webkit-scrollbar-track,
+.recent-items::-webkit-scrollbar-track,
+.pinned-items::-webkit-scrollbar-track,
+.unpinned-items::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.05);
     border-radius: 4px;
 }
 
-body.dark .recent-items::-webkit-scrollbar-track {
+body.dark .recent-section::-webkit-scrollbar-track,
+body.dark .recent-items::-webkit-scrollbar-track,
+body.dark .pinned-items::-webkit-scrollbar-track,
+body.dark .unpinned-items::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
 }
 
-.recent-items::-webkit-scrollbar-thumb {
+.recent-section::-webkit-scrollbar-thumb,
+.recent-items::-webkit-scrollbar-thumb,
+.pinned-items::-webkit-scrollbar-thumb,
+.unpinned-items::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 4px;
 }
 
-body.dark .recent-items::-webkit-scrollbar-thumb {
+body.dark .recent-section::-webkit-scrollbar-thumb,
+body.dark .recent-items::-webkit-scrollbar-thumb,
+body.dark .pinned-items::-webkit-scrollbar-thumb,
+body.dark .unpinned-items::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
 }
 
-.recent-items::-webkit-scrollbar-thumb:hover {
+.recent-section::-webkit-scrollbar-thumb:hover,
+.recent-items::-webkit-scrollbar-thumb:hover,
+.pinned-items::-webkit-scrollbar-thumb:hover,
+.unpinned-items::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.3);
 }
 
-body.dark .recent-items::-webkit-scrollbar-thumb:hover {
+body.dark .recent-section::-webkit-scrollbar-thumb:hover,
+body.dark .recent-items::-webkit-scrollbar-thumb:hover,
+body.dark .pinned-items::-webkit-scrollbar-thumb:hover,
+body.dark .unpinned-items::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
 }
 
@@ -1808,9 +2014,118 @@ body.dark .mobile-nav-btn:hover {
         padding: 12px 40px;
     }
     
-    .recent-items {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 15px;
+    /* 区域标签样式 - 仅移动端显示 */
+    .recent-section {
+        display: block;
+        margin-bottom: 12px;
+    }
+    
+    .recent-section-label {
+        display: block;
+        font-size: 13px;
+        color: #5f6368;
+        margin-bottom: 8px;
+        padding-left: 4px;
+        font-weight: 500;
+    }
+    
+    body.dark .recent-section-label {
+        color: #9aa0a6;
+    }
+    
+    /* 固定项目容器：横向滚动，一行三个 */
+    .pinned-items {
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        gap: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: auto;
+        min-height: 130px;
+        max-height: none;
+        padding: 4px 4px 8px 4px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 0;
+    }
+    
+    /* 非固定项目容器：横向滚动 */
+    .unpinned-items {
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: auto;
+        min-height: 130px;
+        max-height: none;
+        padding: 4px 4px 8px 4px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 0;
+    }
+    
+    /* 固定项目样式：与非固定框一样大 */
+    .pinned-items .recent-item {
+        flex: 0 0 auto;
+        width: 110px;
+        min-width: 110px;
+        scroll-snap-align: start;
+        padding: 14px 8px;
+        height: 120px;
+        box-sizing: border-box;
+    }
+    
+    /* 非固定项目样式 */
+    .unpinned-items .recent-item {
+        flex: 0 0 auto;
+        width: 110px;
+        min-width: 110px;
+        scroll-snap-align: start;
+        padding: 14px 8px;
+        height: 120px;
+        box-sizing: border-box;
+    }
+    
+    .pinned-items .recent-icon,
+    .unpinned-items .recent-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+    
+    .pinned-items .recent-item-title,
+    .unpinned-items .recent-item-title {
+        font-size: 13px;
+    }
+    
+    /* 移动端最近访问容器添加滑动提示 */
+    .recently-used {
+        position: relative;
+    }
+    
+    .recently-used::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 40px;
+        height: 100%;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.9));
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    body.dark .recently-used::after {
+        background: linear-gradient(to right, transparent, rgba(32,33,36,0.9));
+    }
+    
+    .recently-used.has-more::after {
+        opacity: 1;
     }
     
     .settings-panel {
@@ -2284,4 +2599,164 @@ body.dark .default-style-option label {
 
 body.dark .form-group.disabled label {
     color: #5f6368;
+}
+
+/* 最近更新弹窗样式 */
+#update-modal .modal-content {
+    max-width: 480px;
+}
+
+.update-version {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dfe1e5;
+}
+
+body.dark .update-version {
+    border-color: #5f6368;
+}
+
+.version-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #4285f4, #34a853);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+}
+
+.update-date {
+    font-size: 13px;
+    color: #5f6368;
+}
+
+body.dark .update-date {
+    color: #9aa0a6;
+}
+
+.update-content h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #202124;
+    margin: 0 0 15px 0;
+}
+
+body.dark .update-content h4 {
+    color: #e8eaed;
+}
+
+.update-content h4 i {
+    color: #fbbc05;
+}
+
+.update-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.update-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #202124;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+body.dark .update-list li {
+    color: #e8eaed;
+    border-color: #3c4043;
+}
+
+.update-list li:last-child {
+    border-bottom: none;
+}
+
+.update-list li i {
+    color: #34a853;
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.update-list li strong {
+    color: #4285f4;
+    font-weight: 500;
+}
+
+.update-footer-note {
+    margin-top: 20px;
+    padding: 12px 15px;
+    background-color: rgba(251, 188, 5, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #fbbc05;
+}
+
+body.dark .update-footer-note {
+    background-color: rgba(251, 188, 5, 0.15);
+}
+
+.update-footer-note p {
+    margin: 0;
+    font-size: 13px;
+    color: #5f6368;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.dark .update-footer-note p {
+    color: #9aa0a6;
+}
+
+.update-footer-note i {
+    color: #fbbc05;
+}
+
+/* 更新按钮小红点提示 */
+#update-btn {
+    position: relative;
+}
+
+#update-btn::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    background-color: #ea4335;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    display: var(--dot-display, block);
+}
+
+#update-btn.update-seen::after {
+    display: none;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }

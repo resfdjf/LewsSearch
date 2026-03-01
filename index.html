@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lews Search</title>
+    <title>LewSearch</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -23,6 +23,9 @@
                 </button>
             </div>
             <div class="nav-right">
+                <button id="update-btn" class="nav-btn" title="最近更新">
+                    <i class="fas fa-bell"></i>
+                </button>
                 <button id="tutorial-btn" class="nav-btn" title="新手教程">
                     <i class="fas fa-question-circle"></i>
                 </button>
@@ -37,6 +40,9 @@
             <button id="mobile-theme-toggle" class="mobile-nav-btn" title="切换主题">
                 <i class="fas fa-moon"></i>
             </button>
+            <button id="mobile-update-btn" class="mobile-nav-btn" title="最近更新">
+                <i class="fas fa-bell"></i>
+            </button>
             <button id="mobile-tutorial-btn" class="mobile-nav-btn" title="新手教程">
                 <i class="fas fa-question-circle"></i>
             </button>
@@ -49,7 +55,7 @@
         <main class="main-content">
             <!-- 搜索栏 -->
             <div class="search-container" id="search-container">
-                <h1 class="logo">Lews Search</h1>
+                <h1 class="logo">LewSearch</h1>
                 <form id="search-form" class="search-form">
                     <div class="search-input-container">
                         <i class="fas fa-search search-icon"></i>
@@ -81,7 +87,18 @@
                         </button>
                     </div>
                 </div>
-                <div id="recent-items" class="recent-items"></div>
+                <!-- 无痕模式指示器 -->
+                <div class="incognito-indicator">
+                    <i class="fas fa-user-secret"></i>
+                    <span>无痕模式已开启</span>
+                </div>
+                <!-- 最近访问项目容器（包含固定和非固定） -->
+                <div class="recent-section">
+                    <div class="recent-section-label">固定项目</div>
+                    <div id="pinned-items" class="recent-items pinned-items"></div>
+                    <div class="recent-section-label">最近访问</div>
+                    <div id="recent-items" class="recent-items unpinned-items"></div>
+                </div>
                 <div id="restore-hint" class="restore-hint hidden">
                     <span>手滑了，点击此处可恢复</span>
                     <button id="restore-btn" class="restore-btn">恢复</button>
@@ -92,7 +109,7 @@
         <!-- 设置面板 -->
         <div id="settings-panel" class="settings-panel">
             <div class="settings-header">
-                <h3>外观设置</h3>
+                <h3>设置</h3>
                 <button id="close-settings" class="close-btn">
                     <i class="fas fa-times"></i>
                 </button>
@@ -263,6 +280,18 @@
                         </label>
                     </div>
                 </div>
+                
+                <!-- 隐私设置 -->
+                <div class="setting-section">
+                    <h4>隐私设置</h4>
+                    <div class="setting-options">
+                        <label class="setting-option">
+                            <input type="checkbox" id="incognito-mode">
+                            <span><i class="fas fa-user-secret"></i> 无痕模式</span>
+                        </label>
+                    </div>
+                    <p class="hint">开启后不会保存搜索历史和最近访问记录</p>
+                </div>
             </div>
         </div>
         
@@ -404,6 +433,40 @@
                     <button id="reset-edit-style" class="btn btn-secondary">重置</button>
                     <button id="confirm-edit-style" class="btn btn-primary">应用</button>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 最近更新弹窗 -->
+    <div id="update-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-bell"></i> 最近更新</h3>
+                <button id="close-update-modal" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="update-version">
+                    <span class="version-badge">v.0.9 alpha</span>
+                    <span class="update-date">2025年1月</span>
+                </div>
+                <div class="update-content">
+                    <h4><i class="fas fa-star"></i> 新增功能</h4>
+                    <ul class="update-list">
+                        <li><i class="fas fa-check-circle"></i> <strong>无痕模式</strong> - 开启后不会保存搜索历史和最近访问记录，保护您的隐私</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>双击关闭无痕模式</strong> - 双击无痕模式指示器可快速关闭无痕模式</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>单击提醒功能</strong> - 单击无痕模式指示器会显示双击关闭的提示</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>点击外部关闭设置</strong> - 点击设置面板外部区域可关闭设置</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>最近更新按钮</strong> - 新增版本更新提示功能，随时了解新功能</li>
+                    </ul>
+                </div>
+                <div class="update-footer-note">
+                    <p><i class="fas fa-info-circle"></i> 更多功能正在开发中，敬请期待！</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="close-update-btn" class="btn btn-primary">知道了</button>
             </div>
         </div>
     </div>
